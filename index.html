@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Runner</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #gameContainer {
+            position: relative;
+            background-color: #fff;
+            border: 3px solid #333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        canvas {
+            display: block;
+        }
+        #instructions {
+            margin-top: 20px;
+            color: #555;
+            text-align: center;
+            max-width: 400px;
+        }
+        #restartButton {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #restartButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maze Runner</h1>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+    <p id="instructions">Use arrow keys or WASD to move the player (blue square) to the goal (green square). Avoid the walls!</p>
+    <button id="restartButton" onclick="restartGame()">Restart Game</button>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const tileSize = 40;
+        const rows = canvas.height / tileSize;
+        const cols = canvas.width / tileSize;
+
+        // Maze layout: 0 = path, 1 = wall, 2 = player start, 3 = goal
+        let maze = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 2, 0, 1, 0, 0, 0, 1, 0, 1],
+            [1, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+            [1, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0, 3, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        let player = { x: 1, y: 1 };
+        let gameWon = false;
+
+        function drawMaze() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (maze[y][x] === 1) {
+                        ctx.fillStyle = '#333';
+                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    } else if (maze[y][x] === 3) {
+                        ctx.fillStyle = '#4CAF50';
+                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+            // Draw player
+            ctx.fillStyle = '#2196F3';
+            ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+        }
+
+        function movePlayer(dx, dy) {
+            if (gameWon) return;
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            if (newX >= 0 && newX < cols && newY >= 0 && newY < rows && maze[newY][newX] !== 1) {
+                player.x = newX;
+                player.y = newY;
+                if (maze[newY][newX] === 3) {
+                    gameWon = true;
+                    alert('Congratulations! You reached the goal!');
+                }
+                drawMaze();
+            }
+        }
+
+        function handleKeyPress(e) {
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    movePlayer(0, -1);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    movePlayer(0, 1);
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    movePlayer(-1, 0);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    movePlayer(1, 0);
+                    break;
+            }
+        }
+
+        function restartGame() {
+            player = { x: 1, y: 1 };
+            gameWon = false;
+            drawMaze();
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
+        drawMaze();
+    </script>
+</body>
+</html>
